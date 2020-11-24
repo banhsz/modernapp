@@ -7,31 +7,30 @@
 
 
 $blogbejegyzesek = new adatbazis();
-$blogbejegyzesek->blog_select();
 
-if(isset($_POST["action"]) and $_POST["action"]=="insertform_blog"){
+if(isset($_POST["action"]) and $_POST["action"]=="cmd_insertform_blog"){
 	$blogbejegyzes_insertform = new adatbazis();
 	$blogbejegyzes_insertform->insert_form();
 }
-if(isset($_GET["action"]) and $_GET["action"]=="cmd_insert_blog"){
+if(isset($_POST["action"]) and $_POST["action"]=="cmd_insert_blog"){
 	//echo "<pre>"; var_dump($_REQUEST); echo "</pre>";
-	if( isset($_GET["input_blog_cim"]) and
-		!empty($_GET["input_blog_cim"]) and
-		isset($_GET["input_blog_tartalom"]) and
-		!empty($_GET["input_blog_tartalom"]) ){
+	if( isset($_POST["input_blog_cim"]) and
+		!empty($_POST["input_blog_cim"]) and
+		isset($_POST["input_blog_tartalom"]) and
+		!empty($_POST["input_blog_tartalom"]) ){
 			$blogbejegyzes_insert = new adatbazis();
-			$blogbejegyzes_insert->blog_insert($_GET["input_blog_cim"],
-											   $_GET["input_blog_tartalom"],
-											   $_GET["input_blog_datum"],
-											   $_GET["input_blog_lathatosag"]);			
+			$blogbejegyzes_insert->blog_insert($_POST["input_blog_cim"],
+											   $_POST["input_blog_tartalom"],
+											   $_POST["input_blog_datum"],
+											   $_POST["input_blog_lathatosag"]);			
 		}
 }
 
 if(isset($_POST["action"]) and $_POST["action"]=="cmd_delete_blog"){
-	if( isset($_POST["id"]) and
-		is_numeric($_POST["id"])){
+	if( isset($_POST["input_id"]) and
+		is_numeric($_POST["input_id"])){
 			$blogbejegyzes_delete = new adatbazis();
-			$blogbejegyzes_delete->blog_delete($_POST["id"]);			
+			$blogbejegyzes_delete->blog_delete($_POST["input_id"]);			
 		}
 }
 
@@ -117,12 +116,13 @@ if(isset($_POST["action"]) and $_POST["action"]=="cmd_details_blog"){
 			$blogbejegyzes_delete->blog_details($_POST["input_id"]);			
 		}
 }
+$blogbejegyzesek->blog_select();
 
 class adatbazis{
 	//adattagok
-	public $servername = "localhost";
-	public $username = "roti";
-	public $password = "";
+	public $servername = "mysql";
+	public $username = "root";
+	public $password = "root";
 	public $dbname = "gipsz_jakab";	
 	public $conn = NULL; 
 	public $sql = NULL; 
@@ -131,7 +131,7 @@ class adatbazis{
 	public $rows = NULL; 
 	
 	public function __construct(){
-		//$this->kapcsolodas();
+		$this->kapcsolodas();
 	}
 	public function __destruct(){
 		$this->kapcsolatbontas();
@@ -151,7 +151,7 @@ class adatbazis{
 	
 	
 	public function updateform_blog($id){
-		$this->sql = "SELECT blog_id, blog_cim, blog_tartalom, blog_datum, blog_szin FROM blog WHERE blog_id  = $id";
+		$this->sql = "SELECT blog_id, blog_cim, blog_tartalom, blog_datum, blog_szin, blog_lathatosag FROM blog WHERE blog_id  = $id";
 		$this->result = $this->conn->query($this->sql);
 
 		if ($this->result->num_rows > 0) {
@@ -161,10 +161,10 @@ class adatbazis{
 			echo "<form method='POST'>
 				Add meg a blog címét:<br />
 				<input type='text' name='input_blog_cim'
-				value=".$this->row['blog_cim']."
+				value=\"".htmlentities($this->row['blog_cim'] . '>', ENT_COMPAT)."\"
 				><br />
 				Add meg a blog tartalmát:<br />
-				<textarea name='input_blog_tartalom'>".$this->row['blog_tartalom']."</textarea><br />
+				<textarea name='input_blog_tartalom'>".$this->row['blog_tartalom']. "</textarea><br />
 				Add meg a bejegyzés dátumát:<br />
 				<input type='date' name='input_blog_datum'
 				value=".$this->row['blog_datum']."
@@ -289,10 +289,11 @@ class adatbazis{
 	}
 	
 	public function blog_insert($cim, $tartalom, $datum = "1000-01-01", $lathatosag = 0){
-		if ($datum = "1000-01-01") {
+		if ("1000-01-01" == $datum) {
 			date_default_timezone_set('Europe/Budapest');
 			$datum = date("Y-m-d");
 		}
+		$lathatosag = (int)$lathatosag;
 		$this->sql = "INSERT INTO 
 						blog
 							(
@@ -314,6 +315,9 @@ class adatbazis{
 		if ($this->conn->query($this->sql)){
 			echo "<p>Sikeres blogbejegyzés felvétel</p>";
 		} else {
+			echo '<pre>';
+			print_r(get_defined_vars());
+			print_r($this->conn->error_list);
 			echo "<p>Sikertelen blogbejegyzés felvétel</p>";
 		}
 	}
@@ -322,11 +326,11 @@ class adatbazis{
 		$this->sql = "DELETE FROM
 						blog
 					  WHERE
-						blog_id  = $xd;";
+						blog_id  = $id;";
 		if ($this->conn->query($this->sql)){
-			echo "<p>Sikeres blogbejegyzés felvétel</p>";
+			echo "<p>Sikeres blogbejegyzés törlés</p>";
 		} else {
-			echo "<p>Sikertelen blogbejegyzés felvétel</p>";
+			echo "<p>Sikertelen blogbejegyzés törlés</p>";
 		}
 	}	
 	public function blog_show($id){
@@ -336,7 +340,6 @@ class adatbazis{
 						blog_lathatosag = 1
 					  WHERE
 						blog_id  = $id;";
-		var_dump($this->sql);
 		if ($this->conn->query($this->sql)){
 			echo "<p>Sikeres a blogbejegyzés megjelenítése</p>";
 		} else {
@@ -347,10 +350,10 @@ class adatbazis{
 		$this->sql = "UPDATE
 						blog
 					  SET
-						blog_lathatosag = 10
+						blog_lathatosag = 0
 					  WHERE
 						blog_id  = $id;";
-		var_dump($this->sql);
+		
 		if ($this->conn->query($this->sql)){
 			echo "<p>Sikeres a blogbejegyzés elrejtése</p>";
 		} else {
@@ -421,9 +424,3 @@ class adatbazis{
 		</fieldset>";
 	}
 }
-
-
-
-
-
-?>
