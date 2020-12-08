@@ -30,10 +30,10 @@ USE `gipsz_jakab`;
 -- Tábla szerkezet ehhez a táblához `blog`
 --
 
-CREATE TABLE `blogs` (
+CREATE TABLE `blog` (
   `blog_id` int(11) NOT NULL,
   `blog_cim` varchar(1024) COLLATE utf8_hungarian_ci NOT NULL,
-  `blog_content` text COLLATE utf8_hungarian_ci NOT NULL,
+  `blog_tartalom` text COLLATE utf8_hungarian_ci NOT NULL,
   `blog_datum` date NOT NULL,
   `blog_lathatosag` tinyint(1) NOT NULL,
   `blog_szin` varchar(7) COLLATE utf8_hungarian_ci NOT NULL DEFAULT '#900000'

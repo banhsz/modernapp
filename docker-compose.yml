@@ -5,7 +5,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - .:/var/www
+      - .:/project
   mysql:
     image: mysql:5
     environment:
