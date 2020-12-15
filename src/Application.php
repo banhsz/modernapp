@@ -15,7 +15,7 @@ class Application
         $router = new Router($request);
         $controller = $router->getController();
         if (in_array(WithTemplate::class, class_implements($controller))) {
-            $template = new Template;
+            $template = new TwigTemplate;
             /** @var WithTemplate */
             $controller->setTemplate($template);
         }
