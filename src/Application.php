@@ -2,8 +2,7 @@
 
 namespace App;
 
-use App\Controllers\A;
-use App\Controllers\B;
+use App\Controllers\WithTemplate;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -13,15 +12,13 @@ class Application
     {
 
         $request = Request::createFromGlobals();
-        switch ($request->getPathInfo()) {
-            case '/a':
-                $controller = new A();
-                break;
-            case '/b':
-                    $controller = new B();
-                    break;
-            }
-
+        $router = new Router($request);
+        $controller = $router->getController();
+        if (in_array(WithTemplate::class, class_implements($controller))) {
+            $template = new Template;
+            /** @var WithTemplate */
+            $controller->setTemplate($template);
+        }
         $response = $controller->build($request);
         $response->send();
     }
