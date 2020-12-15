@@ -4,6 +4,7 @@ namespace App;
 
 use App\Controllers\A;
 use App\Controllers\B;
+use App\Controllers\notfound;
 use App\Controllers\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -23,8 +24,11 @@ class Router
                 $controller = new A();
                 break;
             case '/b':
-                    $controller = new B();
-                    break;
+                $controller = new B();
+                break;
+            default:
+                $controller = new notfound();
+                break;
             }
         return $controller;
     }
