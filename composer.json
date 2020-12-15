@@ -1,0 +1,9 @@
+{
+    "name": "petrik/test",
+    "require": {
+        "symfony/http-foundation": "^5.2"
+    },
+    "autoload": {
+        "psr-4": {"App\\": "src/"}
+    }
+}
